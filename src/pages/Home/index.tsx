@@ -3,7 +3,8 @@ import { ArrowRight } from 'phosphor-react'
 import { Container, Hero, Preview } from './styles'
 import Image from 'next/image'
 import AppPreviewImg from '../../assets/app-preview.png'
-import { Form } from './components/ClaimUsernameForm'
+import { ClaimUsernameForm } from './components/ClaimUsernameForm'
+
 export default function Home() {
   return (
     <Container>
@@ -15,12 +16,7 @@ export default function Home() {
           Conecte seu calendário e permita que as pessoas marquem agendamentos
           no seu tempo livre.
         </Text>
-        <Form as="form">
-          <TextInput size="sm" prefix="https://www.calendar/" />
-          <Button size="sm" type="submit">
-            Reservar <ArrowRight />{' '}
-          </Button>
-        </Form>
+        <ClaimUsernameForm />
       </Hero>
       <Preview>
         <Image

@@ -1,12 +1,29 @@
-import { Box, styled } from '@ignite-ui/react'
+import { Button, TextInput } from '@ignite-ui/react'
+import { Form } from './styles'
+import { ArrowRight } from 'phosphor-react'
+import { useForm } from 'react-hook-form'
+import * as zod from 'zod'
 
-export const Form = styled(Box, {
-  display: 'grid',
-  gridTemplateColumns: '1fr auto',
-  gap: '$2',
-  marginTop: '$4',
-  padding: '$4',
-  '@media(max-width: 600px)': {
-    gridTemplateColumns: '1fr',
-  },
+const ClaimUsernameFormSchema = zod.object({
+  username: zod.string(),
 })
+type ClaimUserFormData = zod.infer<typeof ClaimUsernameFormSchema>
+export function ClaimUsernameForm() {
+  const { register, handleSubmit } = useForm<ClaimUserFormData>()
+  function handleClaimUsername(data: ClaimUserFormData) {
+    console.log(data.username)
+  }
+  return (
+    <Form as="form" onSubmit={handleSubmit(handleClaimUsername)}>
+      <TextInput
+        size="sm"
+        prefix="https://www.calendar/"
+        {...register('username')}
+        placeholder="Seu-usuario"
+      />
+      <Button size="sm" type="submit">
+        Reservar <ArrowRight />
+      </Button>
+    </Form>
+  )
+}
