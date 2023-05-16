@@ -4,6 +4,8 @@ import { ArrowRight } from 'phosphor-react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect } from 'react'
+import { useRouter } from 'next/router'
 
 const registerFormSchema = z.object({
   username: z
@@ -25,10 +27,16 @@ export default function Register() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    setValue,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerFormSchema),
   })
-
+  const router = useRouter()
+  useEffect(() => {
+    if (router.query.username) {
+      setValue('username', String(router.query.username))
+    }
+  }, [router.query?.username, setValue])
   function handleRegister() {}
   return (
     <Container>
@@ -51,7 +59,7 @@ export default function Register() {
           <TextInput placeholder="Seu nome" {...register('name')} />
           {errors.name && <FormError>{errors.name.message}</FormError>}
         </label>
-        <Button type="submit">
+        <Button type="submit" disabled={isSubmitting}>
           Próximo passo <ArrowRight />
         </Button>
       </Form>
