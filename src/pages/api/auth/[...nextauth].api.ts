@@ -1,12 +1,11 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextApiRequest, NextApiResponse, NextPageContext } from 'next'
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import GoogleProvider, { GoogleProfile } from 'next-auth/providers/google'
-
-import { PrismaAdapter } from '@/src/lib/auth/prisma-adapter'
+import { PrismaAdapter } from '../../../lib/auth/prisma-adapter'
 
 export function buildNextAuthOptions(
-  req: NextApiRequest,
-  res: NextApiResponse,
+  req: NextApiRequest | NextPageContext['req'],
+  res: NextApiResponse | NextPageContext['res'],
 ): NextAuthOptions {
   return {
     adapter: PrismaAdapter(req, res),
@@ -16,6 +15,9 @@ export function buildNextAuthOptions(
         clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
         authorization: {
           params: {
+            prompt: 'consent',
+            access_type: 'offline',
+            response_type: 'code',
             scope:
               'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar',
           },
@@ -36,8 +38,9 @@ export function buildNextAuthOptions(
         if (
           !account?.scope?.includes('https://www.googleapis.com/auth/calendar')
         ) {
-          return '/register/connect-calendar/?error=permissions'
+          return '/register/connect-calendar?error=permissions'
         }
+
         return true
       },
       async session({ session, user }) {
@@ -51,5 +54,5 @@ export function buildNextAuthOptions(
 }
 
 export default async function auth(req: NextApiRequest, res: NextApiResponse) {
-  return await NextAuth(req, res, buildNextAuthOptions(req, res))
+  return NextAuth(req, res, buildNextAuthOptions(req, res))
 }
