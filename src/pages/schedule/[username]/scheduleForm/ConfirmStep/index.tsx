@@ -4,7 +4,14 @@ import { CalendarBlank, Clock } from 'phosphor-react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import dayjs from 'dayjs'
+import { api } from '@/src/lib/axios'
+import { useRouter } from 'next/router'
 
+interface ConfirmStepProps {
+  schedulingDate: Date
+  onCancelConfirmation: () => void
+}
 const confirmFormSchema = z.object({
   name: z
     .string()
@@ -14,7 +21,10 @@ const confirmFormSchema = z.object({
 })
 
 type ConfirmFormData = z.infer<typeof confirmFormSchema>
-export function ConfirmStep() {
+export function ConfirmStep({
+  schedulingDate,
+  onCancelConfirmation,
+}: ConfirmStepProps) {
   const {
     register,
     handleSubmit,
@@ -22,17 +32,32 @@ export function ConfirmStep() {
   } = useForm<ConfirmFormData>({
     resolver: zodResolver(confirmFormSchema),
   })
-  function handleConfirmScheduling() {}
+  const router = useRouter()
+  const username = String(router.query.username)
+  async function handleConfirmScheduling(data: ConfirmFormData) {
+    const { name, email, observations } = data
+
+    await api.post(`/users/${username}/schedule`, {
+      name,
+      email,
+      observations,
+      date: schedulingDate,
+    })
+
+    onCancelConfirmation()
+  }
+  const describedDate = dayjs(schedulingDate).format('DD[ de ]MMMM[ de ]YYYY')
+  const describedTime = dayjs(schedulingDate).format('HH:mm[h]')
   return (
     <ConfirmForm as="form" onSubmit={handleSubmit(handleConfirmScheduling)}>
       <FormHeader>
         <Text>
           <CalendarBlank />
-          22 de Setembro
+          {describedDate}
         </Text>
         <Text>
           <Clock />
-          18:00
+          {describedTime}
         </Text>
       </FormHeader>
       <label htmlFor="">
@@ -54,7 +79,7 @@ export function ConfirmStep() {
         <TextArea {...register('observations')} />
       </label>
       <FormActions>
-        <Button type="button" variant="tertiary">
+        <Button type="button" variant="tertiary" onClick={onCancelConfirmation}>
           Cancelar
         </Button>
         <Button type="submit" disabled={isSubmitting}>
